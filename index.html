@@ -519,6 +519,15 @@
         const generatePaymentBtn = document.getElementById('generate-payment-btn');
         const generateEventBtn = document.getElementById('generate-event-btn');
         const generateDirectionsBtn = document.getElementById('generate-directions-btn');
+        
+        // Debug button elements
+        console.log('Button elements found:');
+        console.log('generateBtn:', generateBtn);
+        console.log('generateVCardBtn:', generateVCardBtn);
+        console.log('generateWifiBtn:', generateWifiBtn);
+        console.log('generatePaymentBtn:', generatePaymentBtn);
+        console.log('generateEventBtn:', generateEventBtn);
+        console.log('generateDirectionsBtn:', generateDirectionsBtn);
         const toast = document.getElementById('toast');
         const qrPreview = document.getElementById('qr-preview');
         const bottomNav = document.querySelector('.bottom-nav');
@@ -809,32 +818,39 @@
         }
         
         // Event Listeners
+        console.log('Adding event listeners...');
         generateBtn.addEventListener('click', () => {
+            console.log('Generate button clicked!');
             generateQR();
             ensureQRVisible();
         });
         
         generateVCardBtn.addEventListener('click', () => {
+            console.log('VCard button clicked!');
             generateQR();
             ensureQRVisible();
         });
         
         generateWifiBtn.addEventListener('click', () => {
+            console.log('WiFi button clicked!');
             generateQR();
             ensureQRVisible();
         });
         
         generatePaymentBtn.addEventListener('click', () => {
+            console.log('Payment button clicked!');
             generateQR();
             ensureQRVisible();
         });
         
         generateEventBtn.addEventListener('click', () => {
+            console.log('Event button clicked!');
             generateQR();
             ensureQRVisible();
         });
         
         generateDirectionsBtn.addEventListener('click', () => {
+            console.log('Directions button clicked!');
             generateQR();
             ensureQRVisible();
         });
