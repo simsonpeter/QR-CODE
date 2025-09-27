@@ -648,22 +648,22 @@
                     break;
                     
                 case 'directions':
-                    const address = document.getElementById('directions-address').value.trim();
-                    if (!address) {
+                    const directionsAddress = document.getElementById('directions-address').value.trim();
+                    if (!directionsAddress) {
                         showToast('Please enter destination address');
                         return;
                     }
-                    const label = document.getElementById('directions-label').value.trim();
-                    const note = document.getElementById('directions-note').value.trim();
+                    const directionsLabel = document.getElementById('directions-label').value.trim();
+                    const directionsNote = document.getElementById('directions-note').value.trim();
                     
                     // Create directions QR with Google Maps link
-                    const encodedAddress = encodeURIComponent(address);
+                    const encodedAddress = encodeURIComponent(directionsAddress);
                     qrText = `https://maps.google.com/maps?q=${encodedAddress}`;
                     
                     // Add label and note as additional text
-                    if (label || note) {
-                        qrText += `\n\nLocation: ${label || address}`;
-                        if (note) qrText += `\nNote: ${note}`;
+                    if (directionsLabel || directionsNote) {
+                        qrText += `\n\nLocation: ${directionsLabel || directionsAddress}`;
+                        if (directionsNote) qrText += `\nNote: ${directionsNote}`;
                     }
                     break;
             }
