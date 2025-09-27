@@ -61,17 +61,26 @@
             position: sticky;
             top: 60px;
             z-index: 99;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .tabs::-webkit-scrollbar {
+            display: none;
         }
         
         .tab {
-            flex: 1;
+            flex: 0 0 auto;
+            min-width: 80px;
             text-align: center;
-            padding: 12px 0;
+            padding: 10px 8px;
             border-radius: 12px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.2s;
+            white-space: nowrap;
         }
         
         .tab.active {
@@ -286,12 +295,12 @@
     <div class="container">
         <!-- Tabs -->
         <div class="tabs">
-            <div class="tab active" data-tab="text">Text/URL</div>
+            <div class="tab active" data-tab="text">Text</div>
             <div class="tab" data-tab="vcard">Contact</div>
             <div class="tab" data-tab="wifi">Wi-Fi</div>
             <div class="tab" data-tab="payment">Payment</div>
             <div class="tab" data-tab="event">Event</div>
-            <div class="tab" data-tab="directions">Directions</div>
+            <div class="tab" data-tab="directions">Map</div>
         </div>
         
         <!-- Text/URL Section -->
