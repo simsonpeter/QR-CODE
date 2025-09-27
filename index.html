@@ -61,26 +61,17 @@
             position: sticky;
             top: 60px;
             z-index: 99;
-            overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        
-        .tabs::-webkit-scrollbar {
-            display: none;
         }
         
         .tab {
-            flex: 0 0 auto;
-            min-width: 80px;
+            flex: 1;
             text-align: center;
-            padding: 10px 8px;
+            padding: 12px 0;
             border-radius: 12px;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.2s;
-            white-space: nowrap;
         }
         
         .tab.active {
@@ -294,12 +285,10 @@
     <div class="container">
         <!-- Tabs -->
         <div class="tabs">
-            <div class="tab active" data-tab="text">Text</div>
+            <div class="tab active" data-tab="text">Text/URL</div>
             <div class="tab" data-tab="vcard">Contact</div>
             <div class="tab" data-tab="wifi">Wi-Fi</div>
             <div class="tab" data-tab="payment">Payment</div>
-            <div class="tab" data-tab="event">Event</div>
-            <div class="tab" data-tab="directions">Map</div>
         </div>
         
         <!-- Text/URL Section -->
@@ -423,61 +412,6 @@
             <button class="btn btn-primary" id="generate-payment-btn">Generate Payment QR</button>
         </div>
         
-        <!-- Event Section -->
-        <div class="section" id="event-section">
-            <div class="form-group">
-                <label for="event-title">Event Title *</label>
-                <input type="text" id="event-title" placeholder="My Awesome Event">
-            </div>
-            
-            <div class="form-group">
-                <label for="event-description">Description</label>
-                <textarea id="event-description" placeholder="Join us for an amazing event..."></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="event-location">Location</label>
-                <input type="text" id="event-location" placeholder="123 Main St, City, State">
-            </div>
-            
-            <div class="form-group">
-                <label for="event-start-date">Start Date</label>
-                <input type="datetime-local" id="event-start-date">
-            </div>
-            
-            <div class="form-group">
-                <label for="event-end-date">End Date</label>
-                <input type="datetime-local" id="event-end-date">
-            </div>
-            
-            <div class="form-group">
-                <label for="event-url">Event URL</label>
-                <input type="url" id="event-url" placeholder="https://example.com/event">
-            </div>
-            
-            <button class="btn btn-primary" id="generate-event-btn">Generate Event QR</button>
-        </div>
-        
-        <!-- Directions Section -->
-        <div class="section" id="directions-section">
-            <div class="form-group">
-                <label for="directions-address">Destination Address *</label>
-                <input type="text" id="directions-address" placeholder="123 Main St, City, State">
-            </div>
-            
-            <div class="form-group">
-                <label for="directions-label">Location Label</label>
-                <input type="text" id="directions-label" placeholder="My Office">
-            </div>
-            
-            <div class="form-group">
-                <label for="directions-note">Additional Notes</label>
-                <textarea id="directions-note" placeholder="Parking available in the back..."></textarea>
-            </div>
-            
-            <button class="btn btn-primary" id="generate-directions-btn">Generate Directions QR</button>
-        </div>
-        
         <!-- QR Preview - Hidden by default -->
         <div class="qr-preview" id="qr-preview">
             <div id="qrcode"></div>
@@ -516,8 +450,6 @@
         const generateVCardBtn = document.getElementById('generate-vcard-btn');
         const generateWifiBtn = document.getElementById('generate-wifi-btn');
         const generatePaymentBtn = document.getElementById('generate-payment-btn');
-        const generateEventBtn = document.getElementById('generate-event-btn');
-        const generateDirectionsBtn = document.getElementById('generate-directions-btn');
         const toast = document.getElementById('toast');
         const qrPreview = document.getElementById('qr-preview');
         const bottomNav = document.querySelector('.bottom-nav');
@@ -528,9 +460,6 @@
         // State
         let qrCode = null;
         let logoImage = null;
-        
-        // Check if QRCode library is loaded
-        console.log('QRCode library loaded:', typeof QRCode !== 'undefined');
         
         // Tab switching
         tabs.forEach(tab => {
@@ -567,9 +496,7 @@
         
         // Generate QR function
         function generateQR() {
-            console.log('Generate QR function called');
             const activeTab = document.querySelector('.tab.active').dataset.tab;
-            console.log('Active tab:', activeTab);
             let qrText = '';
             
             switch(activeTab) {
@@ -638,54 +565,12 @@
                             break;
                     }
                     break;
-                    
-                case 'event':
-                    const title = document.getElementById('event-title').value.trim();
-                    if (!title) {
-                        showToast('Please enter event title');
-                        return;
-                    }
-                    const description = document.getElementById('event-description').value.trim();
-                    const location = document.getElementById('event-location').value.trim();
-                    const startDate = document.getElementById('event-start-date').value;
-                    const endDate = document.getElementById('event-end-date').value;
-                    const eventUrl = document.getElementById('event-url').value.trim();
-                    
-                    qrText = `EVENT: ${title}`;
-                    if (description) qrText += `\nDescription: ${description}`;
-                    if (location) qrText += `\nLocation: ${location}`;
-                    if (startDate) qrText += `\nStart: ${new Date(startDate).toLocaleString()}`;
-                    if (endDate) qrText += `\nEnd: ${new Date(endDate).toLocaleString()}`;
-                    if (eventUrl) qrText += `\nURL: ${eventUrl}`;
-                    break;
-                    
-                case 'directions':
-                    const directionsAddress = document.getElementById('directions-address').value.trim();
-                    if (!directionsAddress) {
-                        showToast('Please enter destination address');
-                        return;
-                    }
-                    const directionsLabel = document.getElementById('directions-label').value.trim();
-                    const directionsNote = document.getElementById('directions-note').value.trim();
-                    
-                    const encodedAddress = encodeURIComponent(directionsAddress);
-                    qrText = `https://maps.google.com/maps?q=${encodedAddress}`;
-                    
-                    if (directionsLabel || directionsNote) {
-                        qrText += `\n\nLocation: ${directionsLabel || directionsAddress}`;
-                        if (directionsNote) qrText += `\nNote: ${directionsNote}`;
-                    }
-                    break;
             }
-            
-            console.log('QR Text to generate:', qrText);
             
             // Clear and generate new QR
             document.getElementById('qrcode').innerHTML = '';
             const size = parseInt(document.getElementById('qr-size').value);
             const color = document.getElementById('qr-color').value;
-            
-            console.log('QRCode library available:', typeof QRCode);
             
             try {
                 qrCode = new QRCode(document.getElementById('qrcode'), {
@@ -803,7 +688,6 @@
         
         // Event Listeners
         generateBtn.addEventListener('click', () => {
-            console.log('Generate button clicked');
             generateQR();
             ensureQRVisible();
         });
@@ -819,16 +703,6 @@
         });
         
         generatePaymentBtn.addEventListener('click', () => {
-            generateQR();
-            ensureQRVisible();
-        });
-        
-        generateEventBtn.addEventListener('click', () => {
-            generateQR();
-            ensureQRVisible();
-        });
-        
-        generateDirectionsBtn.addEventListener('click', () => {
             generateQR();
             ensureQRVisible();
         });
