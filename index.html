@@ -529,6 +529,9 @@
         let qrCode = null;
         let logoImage = null;
         
+        // Check if QRCode library is loaded
+        console.log('QRCode library loaded:', typeof QRCode !== 'undefined');
+        
         // Tab switching
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
@@ -564,7 +567,9 @@
         
         // Generate QR function
         function generateQR() {
+            console.log('Generate QR function called');
             const activeTab = document.querySelector('.tab.active').dataset.tab;
+            console.log('Active tab:', activeTab);
             let qrText = '';
             
             switch(activeTab) {
@@ -673,10 +678,14 @@
                     break;
             }
             
+            console.log('QR Text to generate:', qrText);
+            
             // Clear and generate new QR
             document.getElementById('qrcode').innerHTML = '';
             const size = parseInt(document.getElementById('qr-size').value);
             const color = document.getElementById('qr-color').value;
+            
+            console.log('QRCode library available:', typeof QRCode);
             
             try {
                 qrCode = new QRCode(document.getElementById('qrcode'), {
@@ -794,6 +803,7 @@
         
         // Event Listeners
         generateBtn.addEventListener('click', () => {
+            console.log('Generate button clicked');
             generateQR();
             ensureQRVisible();
         });
