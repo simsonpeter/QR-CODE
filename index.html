@@ -568,6 +568,8 @@
             const activeTab = document.querySelector('.tab.active').dataset.tab;
             let qrText = '';
             
+            console.log('Active tab:', activeTab);
+            
             switch(activeTab) {
                 case 'text':
                     qrText = document.getElementById('text-input').value.trim();
@@ -677,6 +679,8 @@
                     break;
             }
             
+            console.log('QR Text:', qrText);
+            
             // Clear and generate new QR
             document.getElementById('qrcode').innerHTML = '';
             const size = parseInt(document.getElementById('qr-size').value);
@@ -700,7 +704,7 @@
                 }
                 
                 qrPreview.classList.add('visible');
-                showToast('QR code generated! Follow the instructions to save it.');
+                showToast('QR code generated successfully!');
             } catch (error) {
                 console.error('QR Generation Error:', error);
                 showToast('Error generating QR code. Please try again.');
