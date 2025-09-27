@@ -163,6 +163,33 @@
             display: block;
         }
         
+        /* Download Button */
+        .download-btn {
+            background: linear-gradient(90deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        
+        .download-btn:active {
+            transform: translateY(0);
+        }
+        
         #qrcode {
             margin: 0 auto;
             padding: 20px;
@@ -425,12 +452,15 @@
         <!-- QR Preview - Hidden by default -->
         <div class="qr-preview" id="qr-preview">
             <div id="qrcode"></div>
+            <button class="download-btn" id="download-btn">
+                <i class="fas fa-download"></i>
+                Download QR Code
+            </button>
             <div class="save-instructions">
-                <h4><i class="fas fa-download"></i> How to Save Your QR Code</h4>
-                <p><strong>Step 1:</strong> Make sure the QR code is fully visible on your screen</p>
-                <p><strong>Step 2:</strong> Tap and hold on the QR code above</p>
-                <p><strong>Step 3:</strong> Select "Save Image" from the menu that appears</p>
-                <p style="margin-top: 10px; font-weight: bold;">This works on all iPhone and Android devices!</p>
+                <h4><i class="fas fa-info-circle"></i> Save Options</h4>
+                <p><strong>Option 1:</strong> Click the "Download QR Code" button above for instant download</p>
+                <p><strong>Option 2:</strong> Tap and hold on the QR code above, then select "Save Image"</p>
+                <p style="margin-top: 10px; font-weight: bold;">Both methods work on all devices!</p>
             </div>
         </div>
     </div>
@@ -467,6 +497,7 @@
         const bottomNav = document.querySelector('.bottom-nav');
         const logoUpload = document.getElementById('logo-upload');
         const logoPreview = document.getElementById('logo-preview');
+        const downloadBtn = document.getElementById('download-btn');
         
         // State
         let qrCode = null;
@@ -633,6 +664,82 @@
             }, 3000);
         }
         
+        // Download QR code as PNG
+        function downloadQRCode() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) {
+                showToast('No QR code to download. Please generate one first.');
+                return;
+            }
+            
+            try {
+                // Create a temporary canvas with higher resolution for better quality
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                const scale = 2; // Higher resolution
+                
+                tempCanvas.width = canvas.width * scale;
+                tempCanvas.height = canvas.height * scale;
+                
+                // Draw the QR code at higher resolution
+                tempCtx.imageSmoothingEnabled = false;
+                tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // Add logo if present
+                if (logoImage) {
+                    const logoSize = Math.min(tempCanvas.width / 4, 160);
+                    const x = (tempCanvas.width - logoSize) / 2;
+                    const y = (tempCanvas.height - logoSize) / 2;
+                    
+                    tempCtx.clearRect(x, y, logoSize, logoSize);
+                    tempCtx.drawImage(logoImage, x, y, logoSize, logoSize);
+                }
+                
+                // Convert to blob and download
+                tempCanvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    
+                    // Generate filename based on QR content type
+                    const activeTab = document.querySelector('.tab.active').dataset.tab;
+                    let filename = 'qr-code';
+                    
+                    switch(activeTab) {
+                        case 'text':
+                            const textContent = document.getElementById('text-input').value.trim();
+                            if (textContent.startsWith('http')) {
+                                filename = 'qr-url';
+                            } else {
+                                filename = 'qr-text';
+                            }
+                            break;
+                        case 'vcard':
+                            filename = 'qr-contact';
+                            break;
+                        case 'wifi':
+                            filename = 'qr-wifi';
+                            break;
+                        case 'payment':
+                            filename = 'qr-payment';
+                            break;
+                    }
+                    
+                    link.download = `${filename}-${Date.now()}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    
+                    showToast('QR code downloaded successfully!');
+                }, 'image/png');
+                
+            } catch (error) {
+                console.error('Download Error:', error);
+                showToast('Error downloading QR code. Please try again.');
+            }
+        }
+        
         // Ensure QR preview is visible
         function ensureQRVisible() {
             if (qrPreview.classList.contains('visible')) {
@@ -666,6 +773,9 @@
             generateQR();
             ensureQRVisible();
         });
+        
+        // Download button event listener
+        downloadBtn.addEventListener('click', downloadQRCode);
         
         // Enter key to generate
         document.addEventListener('keydown', (e) => {
