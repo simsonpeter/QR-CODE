@@ -173,6 +173,11 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
         
+        #qrcode canvas {
+            border: 4px solid #333333;
+            border-radius: 8px;
+        }
+        
         /* Save Instructions */
         .save-instructions {
             background: #dbeafe;
@@ -428,14 +433,14 @@
             <div id="qrcode"></div>
             <div class="download-section">
                 <button class="btn btn-primary" id="download-btn" style="margin-bottom: 20px;">
-                    <i class="fas fa-download"></i> Download QR Code (with Frame)
+                    <i class="fas fa-download"></i> Download QR Code (with Border)
                 </button>
             </div>
             <div class="save-instructions">
                 <h4><i class="fas fa-info-circle"></i> How to Save Your QR Code</h4>
-                <p><strong>Option 1:</strong> Click the "Download QR Code (with Frame)" button above</p>
+                <p><strong>Option 1:</strong> Click the "Download QR Code (with Border)" button above</p>
                 <p><strong>Option 2:</strong> Tap and hold on the QR code above, then select "Save Image"</p>
-                <p style="margin-top: 10px; font-weight: bold;">The download button includes the beautiful background frame!</p>
+                <p style="margin-top: 10px; font-weight: bold;">The download button includes the square border around the QR code!</p>
             </div>
         </div>
     </div>
@@ -639,10 +644,10 @@
             }, 3000);
         }
         
-        // Download QR code as image with background frame
+        // Download QR code as image with square border
         function downloadQRCode() {
-            const qrPreviewElement = document.getElementById('qr-preview');
-            if (!qrPreviewElement || !qrPreviewElement.classList.contains('visible')) {
+            const qrCodeElement = document.getElementById('qrcode');
+            if (!qrCodeElement || !qrCodeElement.querySelector('canvas')) {
                 showToast('No QR code to download. Please generate one first.');
                 return;
             }
@@ -650,19 +655,19 @@
             showToast('Preparing download...');
             
             try {
-                // Use html2canvas to capture the entire QR preview section with styling
-                html2canvas(qrPreviewElement, {
+                // Use html2canvas to capture just the QR code with its border
+                html2canvas(qrCodeElement, {
                     backgroundColor: '#ffffff',
                     scale: 2, // Higher resolution
                     useCORS: true,
                     allowTaint: true,
                     logging: false,
-                    width: qrPreviewElement.offsetWidth,
-                    height: qrPreviewElement.offsetHeight
+                    width: qrCodeElement.offsetWidth,
+                    height: qrCodeElement.offsetHeight
                 }).then(canvas => {
                     // Create a temporary link element
                     const link = document.createElement('a');
-                    link.download = 'qr-code-with-frame.png';
+                    link.download = 'qr-code-with-border.png';
                     
                     // Convert canvas to blob and create download URL
                     canvas.toBlob((blob) => {
@@ -678,7 +683,7 @@
                             // Clean up the URL object
                             URL.revokeObjectURL(url);
                             
-                            showToast('QR code with frame downloaded successfully!');
+                            showToast('QR code with border downloaded successfully!');
                         } else {
                             showToast('Error creating download file. Please try again.');
                         }
