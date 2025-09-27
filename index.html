@@ -425,6 +425,7 @@
         <!-- QR Preview - Hidden by default -->
         <div class="qr-preview" id="qr-preview">
             <div id="qrcode"></div>
+            <button class="btn btn-primary" id="download-btn" style="margin-top: 16px;">Download PNG</button>
             <div class="save-instructions">
                 <h4><i class="fas fa-download"></i> How to Save Your QR Code</h4>
                 <p><strong>Step 1:</strong> Make sure the QR code is fully visible on your screen</p>
@@ -467,6 +468,7 @@
         const bottomNav = document.querySelector('.bottom-nav');
         const logoUpload = document.getElementById('logo-upload');
         const logoPreview = document.getElementById('logo-preview');
+        const downloadBtn = document.getElementById('download-btn');
         
         // State
         let qrCode = null;
@@ -622,6 +624,75 @@
             ctx.drawImage(logoImage, x, y, logoSize, logoSize);
         }
         
+        // Download QR as PNG
+        function downloadQR() {
+            const qrContainer = document.getElementById('qrcode');
+            let canvas = qrContainer.querySelector('canvas');
+            let exportCanvas = canvas;
+            
+            if (!canvas) {
+                const img = qrContainer.querySelector('img');
+                if (!img) {
+                    showToast('Please generate a QR code first');
+                    return;
+                }
+                // Convert image to canvas for export
+                exportCanvas = document.createElement('canvas');
+                exportCanvas.width = img.naturalWidth || 300;
+                exportCanvas.height = img.naturalHeight || 300;
+                const ctx = exportCanvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+                ctx.drawImage(img, 0, 0, exportCanvas.width, exportCanvas.height);
+                
+                // If a logo was selected, draw it in the center
+                if (logoImage) {
+                    const size = exportCanvas.width;
+                    const logoSize = Math.min(size / 4, 80);
+                    const x = (size - logoSize) / 2;
+                    const y = (size - logoSize) / 2;
+                    ctx.clearRect(x, y, logoSize, logoSize);
+                    ctx.drawImage(logoImage, x, y, logoSize, logoSize);
+                }
+            } else {
+                // Ensure logo is present on canvas before exporting
+                if (logoImage) {
+                    addLogoToQR(canvas.width);
+                }
+            }
+            
+            const fileName = 'qr-code.png';
+            const triggerDownload = (blobOrUrl) => {
+                let url = typeof blobOrUrl === 'string' ? blobOrUrl : URL.createObjectURL(blobOrUrl);
+                const link = document.createElement('a');
+                if ('download' in link) {
+                    link.href = url;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    if (url.startsWith('blob:')) {
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    }
+                } else {
+                    // Fallback for browsers that don't support the download attribute (e.g., older iOS Safari)
+                    window.open(url, '_blank');
+                }
+            };
+            
+            if (exportCanvas.toBlob) {
+                exportCanvas.toBlob((blob) => {
+                    if (!blob) {
+                        triggerDownload(exportCanvas.toDataURL('image/png'));
+                    } else {
+                        triggerDownload(blob);
+                    }
+                }, 'image/png');
+            } else {
+                triggerDownload(exportCanvas.toDataURL('image/png'));
+            }
+        }
+        
         // Show toast
         function showToast(message) {
             toast.classList.remove('show');
@@ -666,6 +737,8 @@
             generateQR();
             ensureQRVisible();
         });
+        
+        downloadBtn.addEventListener('click', downloadQR);
         
         // Enter key to generate
         document.addEventListener('keydown', (e) => {
