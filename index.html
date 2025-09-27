@@ -187,7 +187,6 @@
             border-radius: 8px;
         }
         
-        
         /* Bottom Navigation - Always visible */
         .bottom-nav {
             display: flex;
@@ -519,15 +518,6 @@
         const generatePaymentBtn = document.getElementById('generate-payment-btn');
         const generateEventBtn = document.getElementById('generate-event-btn');
         const generateDirectionsBtn = document.getElementById('generate-directions-btn');
-        
-        // Debug button elements
-        console.log('Button elements found:');
-        console.log('generateBtn:', generateBtn);
-        console.log('generateVCardBtn:', generateVCardBtn);
-        console.log('generateWifiBtn:', generateWifiBtn);
-        console.log('generatePaymentBtn:', generatePaymentBtn);
-        console.log('generateEventBtn:', generateEventBtn);
-        console.log('generateDirectionsBtn:', generateDirectionsBtn);
         const toast = document.getElementById('toast');
         const qrPreview = document.getElementById('qr-preview');
         const bottomNav = document.querySelector('.bottom-nav');
@@ -574,11 +564,8 @@
         
         // Generate QR function
         function generateQR() {
-            console.log('generateQR function called');
             const activeTab = document.querySelector('.tab.active').dataset.tab;
             let qrText = '';
-            
-            console.log('Active tab:', activeTab);
             
             switch(activeTab) {
                 case 'text':
@@ -659,7 +646,6 @@
                     const endDate = document.getElementById('event-end-date').value;
                     const eventUrl = document.getElementById('event-url').value.trim();
                     
-                    // Create event QR as structured text
                     qrText = `EVENT: ${title}`;
                     if (description) qrText += `\nDescription: ${description}`;
                     if (location) qrText += `\nLocation: ${location}`;
@@ -677,11 +663,9 @@
                     const directionsLabel = document.getElementById('directions-label').value.trim();
                     const directionsNote = document.getElementById('directions-note').value.trim();
                     
-                    // Create directions QR with Google Maps link
                     const encodedAddress = encodeURIComponent(directionsAddress);
                     qrText = `https://maps.google.com/maps?q=${encodedAddress}`;
                     
-                    // Add label and note as additional text
                     if (directionsLabel || directionsNote) {
                         qrText += `\n\nLocation: ${directionsLabel || directionsAddress}`;
                         if (directionsNote) qrText += `\nNote: ${directionsNote}`;
@@ -689,16 +673,12 @@
                     break;
             }
             
-            console.log('QR Text:', qrText);
-            
             // Clear and generate new QR
             document.getElementById('qrcode').innerHTML = '';
             const size = parseInt(document.getElementById('qr-size').value);
             const color = document.getElementById('qr-color').value;
             
             try {
-                console.log('Creating QR code with text:', qrText);
-                console.log('QRCode library available:', typeof QRCode);
                 qrCode = new QRCode(document.getElementById('qrcode'), {
                     text: qrText,
                     width: size,
@@ -759,32 +739,27 @@
             showToast('Preparing download...');
             
             try {
-                // Use html2canvas to capture just the QR code with its border
                 html2canvas(qrCodeElement, {
                     backgroundColor: '#ffffff',
-                    scale: 2, // Higher resolution
+                    scale: 2,
                     useCORS: true,
                     allowTaint: true,
                     logging: false,
                     width: qrCodeElement.offsetWidth,
                     height: qrCodeElement.offsetHeight
                 }).then(canvas => {
-                    // Create a temporary link element
                     const link = document.createElement('a');
                     link.download = 'qr-code-with-border.png';
                     
-                    // Convert canvas to blob and create download URL
                     canvas.toBlob((blob) => {
                         if (blob) {
                             const url = URL.createObjectURL(blob);
                             link.href = url;
                             
-                            // Trigger download
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
                             
-                            // Clean up the URL object
                             URL.revokeObjectURL(url);
                             
                             showToast('QR code downloaded successfully!');
@@ -818,39 +793,32 @@
         }
         
         // Event Listeners
-        console.log('Adding event listeners...');
         generateBtn.addEventListener('click', () => {
-            console.log('Generate button clicked!');
             generateQR();
             ensureQRVisible();
         });
         
         generateVCardBtn.addEventListener('click', () => {
-            console.log('VCard button clicked!');
             generateQR();
             ensureQRVisible();
         });
         
         generateWifiBtn.addEventListener('click', () => {
-            console.log('WiFi button clicked!');
             generateQR();
             ensureQRVisible();
         });
         
         generatePaymentBtn.addEventListener('click', () => {
-            console.log('Payment button clicked!');
             generateQR();
             ensureQRVisible();
         });
         
         generateEventBtn.addEventListener('click', () => {
-            console.log('Event button clicked!');
             generateQR();
             ensureQRVisible();
         });
         
         generateDirectionsBtn.addEventListener('click', () => {
-            console.log('Directions button clicked!');
             generateQR();
             ensureQRVisible();
         });
