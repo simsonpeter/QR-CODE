@@ -565,6 +565,7 @@
         
         // Generate QR function
         function generateQR() {
+            console.log('generateQR function called');
             const activeTab = document.querySelector('.tab.active').dataset.tab;
             let qrText = '';
             
@@ -687,6 +688,8 @@
             const color = document.getElementById('qr-color').value;
             
             try {
+                console.log('Creating QR code with text:', qrText);
+                console.log('QRCode library available:', typeof QRCode);
                 qrCode = new QRCode(document.getElementById('qrcode'), {
                     text: qrText,
                     width: size,
