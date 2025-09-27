@@ -174,7 +174,7 @@
         }
         
         #qrcode canvas {
-            border: 4px solid #333333;
+            border: 4px solid transparent;
             border-radius: 8px;
         }
         
@@ -433,14 +433,14 @@
             <div id="qrcode"></div>
             <div class="download-section">
                 <button class="btn btn-primary" id="download-btn" style="margin-bottom: 20px;">
-                    <i class="fas fa-download"></i> Download QR Code (with Border)
+                    <i class="fas fa-download"></i> Download QR Code
                 </button>
             </div>
             <div class="save-instructions">
                 <h4><i class="fas fa-info-circle"></i> How to Save Your QR Code</h4>
-                <p><strong>Option 1:</strong> Click the "Download QR Code (with Border)" button above</p>
+                <p><strong>Option 1:</strong> Click the "Download QR Code" button above</p>
                 <p><strong>Option 2:</strong> Tap and hold on the QR code above, then select "Save Image"</p>
-                <p style="margin-top: 10px; font-weight: bold;">The download button includes the square border around the QR code!</p>
+                <p style="margin-top: 10px; font-weight: bold;">Clean QR code download with invisible border!</p>
             </div>
         </div>
     </div>
@@ -683,7 +683,7 @@
                             // Clean up the URL object
                             URL.revokeObjectURL(url);
                             
-                            showToast('QR code with border downloaded successfully!');
+                            showToast('QR code downloaded successfully!');
                         } else {
                             showToast('Error creating download file. Please try again.');
                         }
