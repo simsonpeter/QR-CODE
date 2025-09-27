@@ -6,6 +6,7 @@
     <title>QR Code Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -273,6 +274,145 @@
             height: 100%;
             object-fit: contain;
         }
+        
+        /* Scan Section */
+        .scan-section {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .scan-section.active {
+            display: block;
+        }
+        
+        #scanner-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        #scanner-container video {
+            width: 100%;
+            height: auto;
+        }
+        
+        .scan-result {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .scan-result h4 {
+            color: #0369a1;
+            margin-bottom: 8px;
+        }
+        
+        .scan-result p {
+            word-break: break-all;
+            font-family: monospace;
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* History Section */
+        .history-section {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+        
+        .history-section.active {
+            display: block;
+        }
+        
+        .history-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .history-item .qr-preview-small {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .history-item .content {
+            flex: 1;
+        }
+        
+        .history-item .content h5 {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            color: #374151;
+        }
+        
+        .history-item .content p {
+            font-size: 0.8rem;
+            color: #6b7280;
+            word-break: break-all;
+        }
+        
+        .history-item .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .history-item .actions button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .empty-history {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-history i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            color: #d1d5db;
+        }
     </style>
 </head>
 <body>
@@ -421,6 +561,39 @@
                 </button>
             </div>
         </div>
+        
+        <!-- Scan Section -->
+        <div class="scan-section" id="scan-section">
+            <h3 style="margin-bottom: 20px;">Scan QR Code</h3>
+            <div id="scanner-container"></div>
+            <div class="scan-result" id="scan-result" style="display: none;">
+                <h4><i class="fas fa-check-circle"></i> QR Code Detected!</h4>
+                <p id="scan-result-text"></p>
+            </div>
+            <button class="btn btn-primary" id="start-scan-btn" style="margin-top: 20px;">
+                <i class="fas fa-camera"></i> Start Scanning
+            </button>
+            <button class="btn btn-secondary" id="stop-scan-btn" style="margin-top: 20px; display: none;">
+                <i class="fas fa-stop"></i> Stop Scanning
+            </button>
+        </div>
+        
+        <!-- History Section -->
+        <div class="history-section" id="history-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>QR Code History</h3>
+                <button class="btn btn-danger" id="clear-history-btn" style="padding: 8px 16px;">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+            </div>
+            <div id="history-list">
+                <div class="empty-history">
+                    <i class="fas fa-history"></i>
+                    <h4>No QR codes generated yet</h4>
+                    <p>Generate your first QR code to see it here!</p>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Bottom Navigation -->
@@ -456,10 +629,18 @@
         const logoUpload = document.getElementById('logo-upload');
         const logoPreview = document.getElementById('logo-preview');
         const downloadBtn = document.getElementById('download-btn');
+        const startScanBtn = document.getElementById('start-scan-btn');
+        const stopScanBtn = document.getElementById('stop-scan-btn');
+        const scanResult = document.getElementById('scan-result');
+        const scanResultText = document.getElementById('scan-result-text');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        const historyList = document.getElementById('history-list');
         
         // State
         let qrCode = null;
         let logoImage = null;
+        let isScanning = false;
+        let history = JSON.parse(localStorage.getItem('qrHistory') || '[]');
         
         // Tab switching
         tabs.forEach(tab => {
@@ -686,6 +867,192 @@
             }
         }
         
+        // Start QR code scanning
+        function startScanning() {
+            if (isScanning) return;
+            
+            isScanning = true;
+            startScanBtn.style.display = 'none';
+            stopScanBtn.style.display = 'inline-block';
+            scanResult.style.display = 'none';
+            
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#scanner-container'),
+                    constraints: {
+                        width: 400,
+                        height: 300,
+                        facingMode: "environment"
+                    }
+                },
+                decoder: {
+                    readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader", "i2of5_reader"]
+                }
+            }, function(err) {
+                if (err) {
+                    console.error('Scanner initialization error:', err);
+                    showToast('Camera access denied or not available');
+                    stopScanning();
+                    return;
+                }
+                Quagga.start();
+            });
+            
+            Quagga.onDetected(function(data) {
+                const code = data.codeResult.code;
+                scanResultText.textContent = code;
+                scanResult.style.display = 'block';
+                showToast('QR code detected!');
+                
+                // Add to history
+                addToHistory('Scanned', code);
+                
+                // Stop scanning after detection
+                setTimeout(() => {
+                    stopScanning();
+                }, 2000);
+            });
+        }
+        
+        // Stop QR code scanning
+        function stopScanning() {
+            if (!isScanning) return;
+            
+            isScanning = false;
+            Quagga.stop();
+            startScanBtn.style.display = 'inline-block';
+            stopScanBtn.style.display = 'none';
+        }
+        
+        // Add QR code to history
+        function addToHistory(type, content) {
+            const historyItem = {
+                id: Date.now(),
+                type: type,
+                content: content,
+                timestamp: new Date().toLocaleString(),
+                preview: generateQRPreview(content)
+            };
+            
+            history.unshift(historyItem);
+            
+            // Keep only last 50 items
+            if (history.length > 50) {
+                history = history.slice(0, 50);
+            }
+            
+            localStorage.setItem('qrHistory', JSON.stringify(history));
+            updateHistoryDisplay();
+        }
+        
+        // Generate small QR preview for history
+        function generateQRPreview(text) {
+            const canvas = document.createElement('canvas');
+            const size = 50;
+            canvas.width = size;
+            canvas.height = size;
+            
+            try {
+                const qr = new QRCode(canvas, {
+                    text: text,
+                    width: size,
+                    height: size,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+                return canvas.toDataURL();
+            } catch (error) {
+                return null;
+            }
+        }
+        
+        // Update history display
+        function updateHistoryDisplay() {
+            if (history.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-history">
+                        <i class="fas fa-history"></i>
+                        <h4>No QR codes generated yet</h4>
+                        <p>Generate your first QR code to see it here!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyList.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="qr-preview-small">
+                        ${item.preview ? `<img src="${item.preview}" alt="QR Code">` : '<i class="fas fa-qrcode"></i>'}
+                    </div>
+                    <div class="content">
+                        <h5>${item.type}</h5>
+                        <p>${item.content.length > 50 ? item.content.substring(0, 50) + '...' : item.content}</p>
+                        <small>${item.timestamp}</small>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-secondary" onclick="regenerateQR('${item.content.replace(/'/g, "\\'")}')">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                        <button class="btn-danger" onclick="removeFromHistory(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Regenerate QR code from history
+        function regenerateQR(content) {
+            document.getElementById('text-input').value = content;
+            document.querySelector('.tab[data-tab="text"]').click();
+            generateQR();
+            ensureQRVisible();
+        }
+        
+        // Remove item from history
+        function removeFromHistory(id) {
+            history = history.filter(item => item.id !== id);
+            localStorage.setItem('qrHistory', JSON.stringify(history));
+            updateHistoryDisplay();
+        }
+        
+        // Clear all history
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all history?')) {
+                history = [];
+                localStorage.removeItem('qrHistory');
+                updateHistoryDisplay();
+                showToast('History cleared');
+            }
+        }
+        
+        // Navigation switching
+        function switchToSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.section, .qr-preview, .scan-section, .history-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Show selected section
+            if (section === 'generate') {
+                document.getElementById('text-section').classList.add('active');
+            } else if (section === 'scan') {
+                document.getElementById('scan-section').classList.add('active');
+            } else if (section === 'history') {
+                document.getElementById('history-section').classList.add('active');
+                updateHistoryDisplay();
+            }
+            
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`.nav-item[data-section="${section}"]`).classList.add('active');
+        }
+        
         // Event Listeners
         generateBtn.addEventListener('click', () => {
             generateQR();
@@ -709,6 +1076,58 @@
         
         // Download button event listener
         downloadBtn.addEventListener('click', downloadQRCode);
+        
+        // Scan functionality
+        startScanBtn.addEventListener('click', startScanning);
+        stopScanBtn.addEventListener('click', stopScanning);
+        
+        // History functionality
+        clearHistoryBtn.addEventListener('click', clearHistory);
+        
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = item.dataset.section;
+                if (section) {
+                    switchToSection(section);
+                }
+            });
+        });
+        
+        // Add data attributes to navigation items
+        document.querySelector('.nav-item[href="#"]').setAttribute('data-section', 'generate');
+        document.querySelectorAll('.nav-item')[1].setAttribute('data-section', 'scan');
+        document.querySelectorAll('.nav-item')[2].setAttribute('data-section', 'history');
+        
+        // Add generated QR codes to history
+        const originalGenerateQR = generateQR;
+        generateQR = function() {
+            originalGenerateQR();
+            if (qrPreview.classList.contains('visible')) {
+                const activeTab = document.querySelector('.tab.active').dataset.tab;
+                let content = '';
+                
+                switch(activeTab) {
+                    case 'text':
+                        content = document.getElementById('text-input').value.trim();
+                        break;
+                    case 'vcard':
+                        content = document.getElementById('vcard-name').value.trim();
+                        break;
+                    case 'wifi':
+                        content = document.getElementById('wifi-ssid').value.trim();
+                        break;
+                    case 'payment':
+                        content = document.getElementById('payment-address').value.trim();
+                        break;
+                }
+                
+                if (content) {
+                    addToHistory(activeTab.charAt(0).toUpperCase() + activeTab.slice(1), content);
+                }
+            }
+        };
         
         // Enter key to generate
         document.addEventListener('keydown', (e) => {
