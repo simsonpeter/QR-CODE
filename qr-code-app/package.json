@@ -1,0 +1,31 @@
+{
+  "name": "qr-code-generator",
+  "displayName": "QR Code Generator",
+  "version": "1.0.0",
+  "description": "Generate QR codes for text, contacts, Wi-Fi, and payments",
+  "main": "index.js",
+  "scripts": {
+    "build": "./build.sh",
+    "build-release": "cordova build android --release",
+    "run": "cordova run android",
+    "requirements": "cordova requirements"
+  },
+  "keywords": [
+    "qr-code",
+    "generator",
+    "mobile",
+    "android",
+    "cordova"
+  ],
+  "author": "QR Code Generator Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/simsonpeter/QR-CODE"
+  },
+  "cordova": {
+    "platforms": [
+      "android"
+    ]
+  }
+}
