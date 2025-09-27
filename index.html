@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>QR Code Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -427,14 +428,14 @@
             <div id="qrcode"></div>
             <div class="download-section">
                 <button class="btn btn-primary" id="download-btn" style="margin-bottom: 20px;">
-                    <i class="fas fa-download"></i> Download QR Code
+                    <i class="fas fa-download"></i> Download QR Code (with Frame)
                 </button>
             </div>
             <div class="save-instructions">
                 <h4><i class="fas fa-info-circle"></i> How to Save Your QR Code</h4>
-                <p><strong>Option 1:</strong> Click the "Download QR Code" button above</p>
+                <p><strong>Option 1:</strong> Click the "Download QR Code (with Frame)" button above</p>
                 <p><strong>Option 2:</strong> Tap and hold on the QR code above, then select "Save Image"</p>
-                <p style="margin-top: 10px; font-weight: bold;">Both methods work on all devices!</p>
+                <p style="margin-top: 10px; font-weight: bold;">The download button includes the beautiful background frame!</p>
             </div>
         </div>
     </div>
@@ -638,38 +639,55 @@
             }, 3000);
         }
         
-        // Download QR code as image
+        // Download QR code as image with background frame
         function downloadQRCode() {
-            const canvas = document.querySelector('#qrcode canvas');
-            if (!canvas) {
+            const qrPreviewElement = document.getElementById('qr-preview');
+            if (!qrPreviewElement || !qrPreviewElement.classList.contains('visible')) {
                 showToast('No QR code to download. Please generate one first.');
                 return;
             }
             
+            showToast('Preparing download...');
+            
             try {
-                // Create a temporary link element
-                const link = document.createElement('a');
-                link.download = 'qr-code.png';
-                
-                // Convert canvas to blob and create download URL
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        const url = URL.createObjectURL(blob);
-                        link.href = url;
-                        
-                        // Trigger download
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        
-                        // Clean up the URL object
-                        URL.revokeObjectURL(url);
-                        
-                        showToast('QR code downloaded successfully!');
-                    } else {
-                        showToast('Error creating download file. Please try again.');
-                    }
-                }, 'image/png');
+                // Use html2canvas to capture the entire QR preview section with styling
+                html2canvas(qrPreviewElement, {
+                    backgroundColor: '#ffffff',
+                    scale: 2, // Higher resolution
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                    width: qrPreviewElement.offsetWidth,
+                    height: qrPreviewElement.offsetHeight
+                }).then(canvas => {
+                    // Create a temporary link element
+                    const link = document.createElement('a');
+                    link.download = 'qr-code-with-frame.png';
+                    
+                    // Convert canvas to blob and create download URL
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            const url = URL.createObjectURL(blob);
+                            link.href = url;
+                            
+                            // Trigger download
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            
+                            // Clean up the URL object
+                            URL.revokeObjectURL(url);
+                            
+                            showToast('QR code with frame downloaded successfully!');
+                        } else {
+                            showToast('Error creating download file. Please try again.');
+                        }
+                    }, 'image/png');
+                    
+                }).catch(error => {
+                    console.error('Canvas capture error:', error);
+                    showToast('Error capturing QR code. Please try again.');
+                });
                 
             } catch (error) {
                 console.error('Download Error:', error);
